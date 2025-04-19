@@ -601,8 +601,22 @@ async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "🔀 /create_quiz_mix_answers – Create quizzes with mixed answers\n"
         "🔄 /create_quiz_mix_phrases – Create quizzes with mixed phrases\n"
         "🎲 /create_random_quiz – Create random quiz from your phrases\n"
-        "📋 /list – List your phrases\n",
+        "📋 /list – List your phrases\n"
+        "🗑️ /clear – Clear all your phrases\n",
     )
+
+
+async def clear_phrases(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Clear all phrases for the current user"""
+    user_id = update.effective_user.id
+
+    if user_id not in user_phrases or not user_phrases[user_id]:
+        await update.message.reply_text("You don't have any phrases to clear!")
+        return
+
+    # Clear the user's phrases
+    user_phrases[user_id] = {}
+    await update.message.reply_text("✅ All your phrases have been cleared!")
 
 
 def main() -> None:
@@ -644,6 +658,7 @@ def main() -> None:
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("list", list_phrases))
     application.add_handler(CommandHandler("help", help_handler))
+    application.add_handler(CommandHandler("clear", clear_phrases))
     application.add_handler(PollAnswerHandler(receive_quiz_answer))
     application.add_handler(PollHandler(receive_quiz_answer))
 
