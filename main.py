@@ -119,6 +119,7 @@ async def receive_mix_phrase(update: Update, context: ContextTypes.DEFAULT_TYPE)
     phrases_and_translations = []
     added_count = 0
     error_count = 0
+    duplicate_count = 0
     quiz_messages = []
 
     # First, collect all valid phrases and translations
@@ -140,9 +141,15 @@ async def receive_mix_phrase(update: Update, context: ContextTypes.DEFAULT_TYPE)
         if translation.endswith("."):
             translation = translation[:-1]
 
-        user_phrases[user_id][phrase] = translation
+        # Add to phrases_and_translations for quiz creation regardless of duplicates
         phrases_and_translations.append((phrase, translation))
-        added_count += 1
+
+        # Only add to user_phrases if it's not a duplicate
+        if phrase not in user_phrases[user_id]:
+            user_phrases[user_id][phrase] = translation
+            added_count += 1
+        else:
+            duplicate_count += 1
 
     # Now create quizzes using other translations as wrong answers
     for phrase, correct_translation in phrases_and_translations:
@@ -194,8 +201,12 @@ async def receive_mix_phrase(update: Update, context: ContextTypes.DEFAULT_TYPE)
         quiz_messages.append(message)
 
     # Send feedback to user
-    if added_count > 0:
+    if added_count > 0 or quiz_messages:
         message = f"✅ Successfully added {added_count} phrase(s)!\n"
+        if duplicate_count > 0:
+            message += (
+                f"⚠️ Skipped {duplicate_count} duplicate phrase(s) in your vocabulary.\n"
+            )
         if error_count > 0:
             message += f"❌ {error_count} line(s) couldn't be processed.\n"
         message += f"\nCreated {len(quiz_messages)} mixed quiz(es) in the target chat!"
@@ -222,6 +233,7 @@ async def receive_mix_phrases_reversed(
     phrases_and_translations = []
     added_count = 0
     error_count = 0
+    duplicate_count = 0
     quiz_messages = []
 
     # First, collect all valid phrases and translations
@@ -243,9 +255,15 @@ async def receive_mix_phrases_reversed(
         if translation.endswith("."):
             translation = translation[:-1]
 
-        user_phrases[user_id][phrase] = translation
+        # Add to phrases_and_translations for quiz creation regardless of duplicates
         phrases_and_translations.append((phrase, translation))
-        added_count += 1
+
+        # Only add to user_phrases if it's not a duplicate
+        if phrase not in user_phrases[user_id]:
+            user_phrases[user_id][phrase] = translation
+            added_count += 1
+        else:
+            duplicate_count += 1
 
     # Now create quizzes using other phrases as wrong answers
     for phrase, translation in phrases_and_translations:
@@ -293,8 +311,12 @@ async def receive_mix_phrases_reversed(
         quiz_messages.append(message)
 
     # Send feedback to user
-    if added_count > 0:
+    if added_count > 0 or quiz_messages:
         message = f"✅ Successfully added {added_count} phrase(s)!\n"
+        if duplicate_count > 0:
+            message += (
+                f"⚠️ Skipped {duplicate_count} duplicate phrase(s) in your vocabulary.\n"
+            )
         if error_count > 0:
             message += f"❌ {error_count} line(s) couldn't be processed.\n"
         message += f"\nCreated {len(quiz_messages)} mixed quiz(es) in the target chat!"
