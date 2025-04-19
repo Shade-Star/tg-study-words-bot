@@ -310,7 +310,7 @@ async def list_phrases(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     user_id = update.effective_user.id
     if user_id not in user_phrases or not user_phrases[user_id]:
         await update.message.reply_text(
-            "You haven't added any phrases yet. Use /add to add some!"
+            "You haven't added any phrases yet. Use /create_quiz_mix_answers or /create_quiz_mix_phrases to add some!"
         )
         return
 
